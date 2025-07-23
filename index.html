@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor - Multi-Language IDE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                <span>CodeEditor</span>
+            </div>
+            <div class="header-controls">
+                <select id="languageSelect" class="language-select">
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="dart">Dart</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="php">PHP</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="go">Go</option>
+                </select>
+                <button id="runBtn" class="run-btn">
+                    <i class="fas fa-play"></i> Run
+                </button>
+                <button id="saveBtn" class="save-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="loadBtn" class="load-btn">
+                    <i class="fas fa-folder-open"></i> Load
+                </button>
+                <button id="testBtn" class="test-btn" style="background-color: #28a745;">
+                    <i class="fas fa-vial"></i> Test
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Section: Sidebar and Editor -->
+            <div class="editor-output-container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="file-explorer">
+                        <h3><i class="fas fa-folder"></i> Files</h3>
+                        <div id="fileList" class="file-list">
+                            <!-- Files will be populated here -->
+                        </div>
+                        <button id="newFileBtn" class="new-file-btn">
+                            <i class="fas fa-plus"></i> New File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editor Area -->
+                <div class="editor-area">
+                    <div class="editor-tabs">
+                        <div class="tab active" data-file="main">
+                            <span>main.js</span>
+                            <i class="fas fa-times tab-close"></i>
+                        </div>
+                    </div>
+                    <div class="editor-container">
+                        <textarea id="codeEditor"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="output-panel">
+                <div class="output-header">
+                    <h3><i class="fas fa-terminal"></i> Output</h3>
+                    <div class="output-controls">
+                        <button id="toggleOutput" class="toggle-btn" title="Toggle Output Panel">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <button id="clearOutput" class="clear-btn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div id="output" class="output-content">
+                    <span class="info">[Ready] Code Editor loaded successfully. Select a language and click Run to execute code.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Input (Hidden) -->
+    <input type="file" id="fileInput" style="display: none;" accept=".js,.py,.java,.cpp,.c,.html,.css,.php,.rb,.go,.txt">
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/dart/dart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

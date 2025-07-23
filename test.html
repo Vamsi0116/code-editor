@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Execution Test</title>
+</head>
+<body>
+    <h1>Code Execution Test</h1>
+    <button onclick="testJavaScript()">Test JavaScript</button>
+    <button onclick="testPython()">Test Python</button>
+    <button onclick="testDart()">Test Dart</button>
+    <div id="output" style="background: #000; color: #0f0; padding: 10px; margin: 10px 0; font-family: monospace;"></div>
+
+    <script>
+        async function executeCode(code, language) {
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code, language })
+                });
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                return { error: true, output: error.message };
+            }
+        }
+
+        function showOutput(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += message + '<br>';
+        }
+
+        async function testJavaScript() {
+            showOutput('Testing JavaScript...');
+            const code = `
+console.log("Hello from JavaScript!");
+console.log("Math result:", 5 + 3);
+console.log("Array example:", [1, 2, 3, 4, 5]);
+            `;
+            const result = await executeCode(code, 'javascript');
+            showOutput('JavaScript Result: ' + JSON.stringify(result, null, 2));
+        }
+
+        async function testPython() {
+            showOutput('Testing Python...');
+            const code = `
+print("Hello from Python!")
+print("Math result:", 5 + 3)
+print("List example:", [1, 2, 3, 4, 5])
+import datetime
+print("Current time:", datetime.datetime.now())
+            `;
+            const result = await executeCode(code, 'python');
+            showOutput('Python Result: ' + JSON.stringify(result, null, 2));
+        }
+
+        async function testDart() {
+            showOutput('Testing Dart...');
+            const code = `
+void main() {
+  print("Hello from Dart!");
+  print("Math result: \${5 + 3}");
+  print("List example: \${[1, 2, 3, 4, 5]}");
+  print("Current time: \${DateTime.now()}");
+}
+            `;
+            const result = await executeCode(code, 'dart');
+            showOutput('Dart Result: ' + JSON.stringify(result, null, 2));
+        }
+    </script>
+</body>
+</html>

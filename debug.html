@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Code Execution</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .output { background: #000; color: #0f0; padding: 15px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 5px; background: #007acc; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a9e; }
+        textarea { width: 100%; height: 200px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Code Execution</h1>
+    
+    <h3>Test Server Connection:</h3>
+    <button onclick="testConnection()">Test Server Connection</button>
+    
+    <h3>Quick Tests:</h3>
+    <button onclick="testJavaScript()">Test JavaScript</button>
+    <button onclick="testPython()">Test Python</button>
+    <button onclick="testDart()">Test Dart</button>
+    
+    <h3>Custom Code:</h3>
+    <select id="languageSelect">
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="dart">Dart</option>
+    </select>
+    <br><br>
+    <textarea id="codeInput" placeholder="Enter your code here...">console.log("Hello, World!");</textarea>
+    <br>
+    <button onclick="runCustomCode()">Run Custom Code</button>
+    
+    <h3>Output:</h3>
+    <div id="output" class="output">Ready to test...\n</div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        async function testConnection() {
+            log('🔄 Testing server connection...');
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: 'console.log("Connection test");', language: 'javascript' })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('✅ Server connection successful!');
+                    log('📤 Server response: ' + JSON.stringify(result, null, 2));
+                } else {
+                    log('❌ Server responded with error: ' + response.status);
+                }
+            } catch (error) {
+                log('❌ Connection failed: ' + error.message);
+            }
+        }
+
+        async function executeCode(code, language) {
+            log(`🚀 Executing ${language} code...`);
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, language })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ ${language.toUpperCase()} executed successfully!`);
+                    log('📤 Output:\n' + result.output);
+                } else {
+                    log(`❌ ${language.toUpperCase()} execution failed:`);
+                    log('📤 Error:\n' + result.output);
+                }
+            } catch (error) {
+                log(`❌ ${language.toUpperCase()} error: ${error.message}`);
+            }
+        }
+
+        async function testJavaScript() {
+            const code = `
+console.log("✅ JavaScript Test");
+console.log("Math: 10 + 5 =", 10 + 5);
+console.log("Array:", [1, 2, 3]);
+console.log("Date:", new Date().toLocaleString());
+            `;
+            await executeCode(code, 'javascript');
+        }
+
+        async function testPython() {
+            const code = `
+print("✅ Python Test")
+print("Math: 10 + 5 =", 10 + 5)
+print("List:", [1, 2, 3])
+import datetime
+print("Date:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            `;
+            await executeCode(code, 'python');
+        }
+
+        async function testDart() {
+            const code = `
+void main() {
+  print("✅ Dart Test");
+  print("Math: 10 + 5 = \${10 + 5}");
+  print("List: \${[1, 2, 3]}");
+  print("Date: \${DateTime.now()}");
+}
+            `;
+            await executeCode(code, 'dart');
+        }
+
+        async function runCustomCode() {
+            const code = document.getElementById('codeInput').value;
+            const language = document.getElementById('languageSelect').value;
+            
+            if (!code.trim()) {
+                log('❌ Please enter some code to execute');
+                return;
+            }
+            
+            await executeCode(code, language);
+        }
+    </script>
+</body>
+</html>

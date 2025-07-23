@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Code Editor - Debug Version</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 5px;
+            background-color: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #5a5a5a;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007acc;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .output {
+            background-color: #0d1117;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Simple Code Editor - Debug Version</h1>
+        
+        <div class="controls">
+            <select id="languageSelect">
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="dart">Dart</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+            </select>
+            <button onclick="runCode()">▶️ Run Code</button>
+            <button onclick="clearOutput()">🗑️ Clear Output</button>
+            <button onclick="testConnection()">🔧 Test Connection</button>
+        </div>
+        
+        <textarea id="codeEditor" placeholder="Write your code here...">console.log("Hello, World!");
+console.log("Current time:", new Date().toLocaleString());
+console.log("Math test:", 5 + 3);</textarea>
+        
+        <div id="output" class="output">Ready to execute code...\n</div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const formattedMessage = `[${timestamp}] ${message}\n`;
+            
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = formattedMessage;
+            
+            output.appendChild(span);
+            output.scrollTop = output.scrollHeight;
+            
+            // Also log to browser console for debugging
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            log('Output cleared', 'info');
+        }
+
+        async function testConnection() {
+            log('🔄 Testing server connection...', 'info');
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        code: 'console.log("Connection test successful!");', 
+                        language: 'javascript' 
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('✅ Server connection successful!', 'success');
+                    log(`Server response: ${JSON.stringify(result)}`, 'info');
+                } else {
+                    log(`❌ Server error: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function runCode() {
+            const code = document.getElementById('codeEditor').value;
+            const language = document.getElementById('languageSelect').value;
+            
+            if (!code.trim()) {
+                log('❌ No code to execute', 'error');
+                return;
+            }
+            
+            log(`🚀 Running ${language.toUpperCase()} code...`, 'info');
+            
+            try {
+                if (language === 'javascript') {
+                    // Run JavaScript locally for immediate feedback
+                    await runJavaScriptLocally(code);
+                } else {
+                    // Run other languages on server
+                    await runOnServer(code, language);
+                }
+            } catch (error) {
+                log(`❌ Execution error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runJavaScriptLocally(code) {
+            const originalConsole = console.log;
+            let output = '';
+            
+            // Capture console.log output
+            console.log = (...args) => {
+                output += args.join(' ') + '\n';
+            };
+            
+            try {
+                const func = new Function(code);
+                const result = func();
+                
+                if (result !== undefined) {
+                    output += `Return value: ${result}\n`;
+                }
+                
+                log(`✅ JAVASCRIPT Output:\n${output || 'Code executed (no output)'}`, 'success');
+            } catch (error) {
+                log(`❌ JAVASCRIPT Error: ${error.message}`, 'error');
+            } finally {
+                console.log = originalConsole;
+            }
+        }
+
+        async function runOnServer(code, language) {
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, language })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    log(`✅ ${language.toUpperCase()} Output:\n${result.output}`, 'success');
+                } else {
+                    log(`❌ ${language.toUpperCase()} Error:\n${result.output}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ ${language.toUpperCase()} execution failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Load sample code based on language selection
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            const language = this.value;
+            const samples = {
+                javascript: 'console.log("Hello, JavaScript!");\nconsole.log("Math:", 5 + 3);\nconsole.log("Array:", [1, 2, 3]);',
+                python: 'print("Hello, Python!")\nprint("Math:", 5 + 3)\nprint("List:", [1, 2, 3])',
+                dart: 'void main() {\n  print("Hello, Dart!");\n  print("Math: ${5 + 3}");\n  print("List: ${[1, 2, 3]}");\n}',
+                java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, Java!");\n        System.out.println("Math: " + (5 + 3));\n    }\n}',
+                cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, C++!" << endl;\n    cout << "Math: " << (5 + 3) << endl;\n    return 0;\n}'
+            };
+            
+            document.getElementById('codeEditor').value = samples[language] || samples.javascript;
+        });
+
+        // Test connection on page load
+        window.addEventListener('load', function() {
+            log('🎉 Simple Code Editor loaded!', 'success');
+            log('Click "Test Connection" to verify server connectivity', 'info');
+        });
+    </script>
+</body>
+</html>
